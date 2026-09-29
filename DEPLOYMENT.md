@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-L3B-DAY12-HoVaTen-MSSV-CloudServicesAndDeployment) |
+| Họ và tên | Ngô Đình Minh Nhật |
+| Mã học viên | 2A202602569 |
+| Repo | https://github.com/MinhNhatUet/K4-L3B-DAY12-NgoDinhMinhNhat-2A202602569--CloudServicesAndDeployment |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | Chưa có — chưa triển khai cloud |
+| Platform | Render — Blueprint đã chuẩn bị, chờ tài khoản để triển khai |
+| Ngày deploy | Chưa triển khai |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -28,12 +28,12 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 
 | Biến | Đã set | Ghi chú |
 |------|--------|---------|
-| `PORT` | ✅ | platform tự gán |
-| `AGENT_API_KEY` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
-| `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
-| `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
-| `LOG_LEVEL` | ✅ | INFO |
+| `PORT` | Chưa xác minh | platform tự gán, không khai báo trong Blueprint |
+| `AGENT_API_KEY` | Chưa xác minh | Blueprint yêu cầu nhập trong dashboard, không nằm trong repo |
+| `REDIS_URL` | Chưa xác minh | Blueprint tham chiếu connectionString của Render Key Value |
+| `RATE_LIMIT_PER_MINUTE` | Chưa xác minh | Blueprint cấu hình 10 |
+| `MONTHLY_BUDGET_USD` | Chưa xác minh | Blueprint cấu hình 10.0 |
+| `LOG_LEVEL` | Chưa xác minh | Blueprint cấu hình INFO |
 
 ## Lệnh Kiểm Tra
 
@@ -73,7 +73,7 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+Chưa có output cloud. Chỉ bổ sung sau khi deploy và gọi URL thật.
 ```
 
 ## Ảnh Chụp Màn Hình
@@ -97,5 +97,6 @@ Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng
 5. Ghi rõ lý do không deploy được vào phần dưới đây:
 
 ```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
+Chưa kích hoạt fallback. Đang chờ lựa chọn của học viên; môi trường hiện
+chưa có CLI/token Render hoặc Railway. Chưa có ảnh dashboard và health.
 ```

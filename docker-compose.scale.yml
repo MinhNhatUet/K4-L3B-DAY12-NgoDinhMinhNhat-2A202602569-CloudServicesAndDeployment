@@ -1,0 +1,8 @@
+# Use with: docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --build --scale agent=3
+# Each replica gets its own available localhost port; Redis stays internal.
+services:
+  agent:
+    ports: !override
+      - "127.0.0.1::8000"
+  redis:
+    ports: !reset []
