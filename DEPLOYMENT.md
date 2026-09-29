@@ -1,102 +1,76 @@
-# Thông Tin Deploy — Checkpoint 5
+# Thông tin deploy — Checkpoint 5
 
-> Điền file này sau khi deploy xong. `pytest tests/test_cp5.py` đọc file này
-> để tìm địa chỉ service của bạn và gọi thử.
->
-> **Chỉ ghi TÊN biến môi trường, tuyệt đối không dán giá trị API key vào đây.**
-> Repo này công khai — dán khóa vào là mất khóa.
-
-## Thông Tin Học Viên
+## Thông tin học viên
 
 | Mục | Nội dung |
 |-----|----------|
 | Họ và tên | Ngô Đình Minh Nhật |
 | Mã học viên | 2A202602569 |
-| Repo | https://github.com/MinhNhatUet/K4-L3B-DAY12-NgoDinhMinhNhat-2A202602569--CloudServicesAndDeployment |
+| Repository | https://github.com/MinhNhatUet/K4-L3B-DAY12-NgoDinhMinhNhat-2A202602569-CloudServicesAndDeployment |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | Chưa có — chưa triển khai cloud |
-| Platform | Render — Blueprint đã chuẩn bị, chờ tài khoản để triển khai |
-| Ngày deploy | Chưa triển khai |
+| Public URL | https://day12-agent-5us0.onrender.com |
+| Platform | Render |
+| Ngày xác minh | 2026-09-29 |
+| Deploy được chụp | Commit `00d5419`, trạng thái Live, 2026-09-29 lúc 10:49 theo dashboard |
+| Triển khai | Dockerfile và Blueprint render.yaml; Render Key Value |
+| Local fallback | Không sử dụng |
 
-## Biến Môi Trường Đã Set Trên Cloud
+## Biến môi trường
 
-Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
+Không ghi giá trị secret. Nguồn cấu hình theo Blueprint; không truy cập dashboard để kiểm tra từng giá trị.
 
-| Biến | Đã set | Ghi chú |
-|------|--------|---------|
-| `PORT` | Chưa xác minh | platform tự gán, không khai báo trong Blueprint |
-| `AGENT_API_KEY` | Chưa xác minh | Blueprint yêu cầu nhập trong dashboard, không nằm trong repo |
-| `REDIS_URL` | Chưa xác minh | Blueprint tham chiếu connectionString của Render Key Value |
-| `RATE_LIMIT_PER_MINUTE` | Chưa xác minh | Blueprint cấu hình 10 |
-| `MONTHLY_BUDGET_USD` | Chưa xác minh | Blueprint cấu hình 10.0 |
-| `LOG_LEVEL` | Chưa xác minh | Blueprint cấu hình INFO |
+| Biến | Nguồn và bằng chứng |
+|------|--------------------|
+| `PORT` | Render tự cấp; Blueprint không ghi đè; public endpoint hoạt động |
+| `AGENT_API_KEY` | Secret nhập trên Render; app khởi động và từ chối request không có key; chưa kiểm tra request có key |
+| `REDIS_URL` | connectionString từ Render Key Value; `/ready` xác nhận kết nối Redis thành công |
+| `RATE_LIMIT_PER_MINUTE` | Blueprint cấu hình 10 |
+| `MONTHLY_BUDGET_USD` | Blueprint cấu hình 10.0 |
+| `LOG_LEVEL` | Blueprint cấu hình INFO |
 
-## Lệnh Kiểm Tra
+## Lệnh kiểm tra (PowerShell)
 
-Thay `<URL>` bằng Public URL ở trên:
-
-```bash
-# 1. Liveness — mong đợi 200 {"status":"ok"}
-curl -i <URL>/health
-
-# 2. Readiness — mong đợi 200 {"status":"ready"} (đã nối được Redis)
-curl -i <URL>/ready
-
-# 3. Không có API key — mong đợi 401
-curl -i -X POST <URL>/ask \
-  -H "Content-Type: application/json" \
-  -d '{"question":"Hello"}'
-
-# 4. Có API key — mong đợi 200 kèm câu trả lời
-curl -i -X POST <URL>/ask \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: $AGENT_API_KEY" \
-  -H "X-User-Id: sv-test" \
-  -d '{"question":"Deploy là gì?"}'
-
-# 5. Rate limit — gọi 15 lần, những lần cuối phải trả 429
-for i in $(seq 1 15); do
-  curl -s -o /dev/null -w "%{http_code} " -X POST <URL>/ask \
-    -H "Content-Type: application/json" \
-    -H "X-API-Key: $AGENT_API_KEY" \
-    -H "X-User-Id: sv-test" \
-    -d '{"question":"test"}'
-done; echo
+```powershell
+$URL = "https://day12-agent-5us0.onrender.com"
+curl.exe -i "$URL/health"
+curl.exe -i "$URL/ready"
+'{"question":"Hello"}' | curl.exe -i "$URL/ask" -H "Content-Type: application/json" --data-binary "@-"
+python -m pytest tests/test_cp5.py -v
 ```
 
-## Kết Quả Chạy Thật
+## Kết quả gọi URL thật
 
-Dán output của các lệnh trên vào đây:
+Xác minh trực tiếp bằng HTTP client ngày 2026-09-29, độc lập với output curl học viên cung cấp. Dưới đây là status và body thực tế (không phải toàn bộ HTTP headers):
 
+```text
+GET https://day12-agent-5us0.onrender.com/health
+HTTP 200
+{"status":"ok","service":"day12-agent","version":"1.0.0"}
+
+GET https://day12-agent-5us0.onrender.com/ready
+HTTP 200
+{"status":"ready","redis":true}
+
+POST https://day12-agent-5us0.onrender.com/ask
+HTTP 401
+{"detail":"invalid or missing API key"}
 ```
-Chưa có output cloud. Chỉ bổ sung sau khi deploy và gọi URL thật.
-```
 
-## Ảnh Chụp Màn Hình
+Kiểm tra `/ask` có xác thực và rate limit trên cloud chưa được xác minh trong lần kiểm tra này. Có thể đặt `DEPLOY_API_KEY` trong `.env` cục bộ (đã được Git ignore) để chạy test bổ sung; không dùng token Render thay API key của service.
 
-Đặt ảnh trong thư mục `screenshots/`:
+## Ảnh chụp màn hình
 
-- `screenshots/dashboard.png` — trang quản lý service trên platform
-- `screenshots/health.png` — kết quả gọi `/health` từ trình duyệt hoặc curl
+Kết quả checkpoint ngày 2026-09-29: **8 passed, 5 skipped**. Bốn test fallback được bỏ qua vì dùng cloud; một test có xác thực được bỏ qua vì chưa đặt `DEPLOY_API_KEY`. Không có test thất bại.
 
----
+Đã kiểm tra trực quan cả hai ảnh: đúng service và URL, không thấy giá trị API key, token hoặc mật khẩu Redis.
 
-## Nếu Dùng Phương Án Dự Phòng
+- [Dashboard Render](screenshots/dashboard.png): service `day12-agent`, URL public, commit `00d5419` và trạng thái Live.
+- [Health endpoint](screenshots/health.png): thanh địa chỉ HTTPS `/health` và JSON có `status: ok`, service `day12-agent`, version `1.0.0`. Mép trái ảnh cắt nhẹ dấu mở JSON nhưng nội dung xác nhận vẫn đọc rõ.
 
-Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng CP5 tối đa 60% điểm:
+![Dashboard Render](screenshots/dashboard.png)
 
-1. Đặt `LOCAL_FALLBACK=true` trong `.env`
-2. Chạy `docker compose up -d` rồi kiểm tra `docker compose ps`
-3. Chụp màn hình vào `screenshots/`
-4. Chạy `pytest tests/test_cp5.py -v` — bộ test sẽ tự chuyển sang kiểm tra
-   `http://localhost:8000`
-5. Ghi rõ lý do không deploy được vào phần dưới đây:
-
-```
-Chưa kích hoạt fallback. Đang chờ lựa chọn của học viên; môi trường hiện
-chưa có CLI/token Render hoặc Railway. Chưa có ảnh dashboard và health.
-```
+![Health endpoint](screenshots/health.png)
